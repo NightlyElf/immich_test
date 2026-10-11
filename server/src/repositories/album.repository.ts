@@ -211,7 +211,7 @@ export class AlbumRepository {
   @GenerateSql({ params: [DummyValue.UUID, { isOwned: true, isShared: true }] })
   getAll(
     ownerId: string,
-    options: { id?: string; isOwned?: boolean; isShared?: boolean; name?: string } = {},
+    options: { id?: string; isOwned?: boolean; isShared?: boolean; name?: string; parentId?: string; root?: boolean } = {},
   ): Promise<MapAlbumDto[]> {
     return this.buildAlbumBaseQuery(ownerId, options)
       .selectAll('album')
@@ -219,6 +219,8 @@ export class AlbumRepository {
       .select(withSharedLink)
       .$if(!!options.id, (qb) => qb.where('album.id', '=', options.id!))
       .$if(!!options.name, (qb) => qb.where('album.albumName', '=', options.name!))
+      .$if(!!options.parentId, (qb) => qb.where('album.parentId', '=', options.parentId!))
+      .$if(!!options.root, (qb) => qb.where('album.parentId', 'is', null))
       .orderBy('album.createdAt', 'desc')
       .execute();
   }
@@ -371,6 +373,25 @@ export class AlbumRepository {
 
   async delete(id: string): Promise<void> {
     await this.db.deleteFrom('album').where('id', '=', id).execute();
+  }
+
+  /** Move all direct children of a folder up to a new parent (null = top level). */
+  async reparentChildren(fromParentId: string, toParentId: string | null): Promise<void> {
+    await this.db.updateTable('album').set({ parentId: toParentId }).where('parentId', '=', fromParentId).execute();
+  }
+
+  /** Walks up from `folderId` and returns the chain of ancestor ids (nearest first). */
+  async getAncestorIds(folderId: string): Promise<string[]> {
+    const rows = await sql<{ id: string }>`
+      WITH RECURSIVE ancestors AS (
+        SELECT "id", "parentId", 1 AS depth FROM "album" WHERE "id" = ${folderId}
+        UNION ALL
+        SELECT a."id", a."parentId", anc.depth + 1 FROM "album" a
+        JOIN ancestors anc ON a."id" = anc."parentId" WHERE anc.depth < 100
+      )
+      SELECT "id" FROM ancestors
+    `.execute(this.db);
+    return rows.rows.map((r) => r.id);
   }
 
   @Chunked({ chunkSize: 30_000 })

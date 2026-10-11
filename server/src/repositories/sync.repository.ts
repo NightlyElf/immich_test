@@ -186,6 +186,7 @@ class AlbumSync extends BaseSync {
         'album.albumThumbnailAssetId as thumbnailAssetId',
         'album.isActivityEnabled',
         'album.order',
+        'album.parentId',
         'album.updateId',
       ])
       .stream();

@@ -48,6 +48,15 @@ export class AlbumTable {
   @Column({ default: AssetOrder.Desc })
   order!: Generated<AssetOrder>;
 
+  @ForeignKeyColumn(() => AlbumTable, {
+    nullable: true,
+    onDelete: 'SET NULL',
+    onUpdate: 'CASCADE',
+    index: true,
+    comment: 'Parent folder (album) ID; null for top-level folders',
+  })
+  parentId!: string | null;
+
   @UpdateIdColumn({ index: true })
   updateId!: Generated<string>;
 }

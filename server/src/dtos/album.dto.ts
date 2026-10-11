@@ -52,6 +52,7 @@ const CreateAlbumSchema = z
       }),
     albumUsers: z.array(AlbumUserCreateSchema).optional().describe('Album users'),
     assetIds: z.array(z.uuidv4()).optional().describe('Initial asset IDs'),
+    parentId: z.uuidv4().nullable().optional().describe('Parent folder ID (null or omitted for a top-level folder)'),
   })
   .meta({ id: 'CreateAlbumDto' });
 
@@ -91,6 +92,7 @@ const UpdateAlbumSchema = z
     albumThumbnailAssetId: z.uuidv4().optional().describe('Album thumbnail asset ID'),
     isActivityEnabled: z.boolean().optional().describe('Enable activity feed'),
     order: AssetOrderSchema.optional(),
+    parentId: z.uuidv4().nullable().optional().describe('Move into this parent folder (null moves to top level)'),
   })
   .meta({ id: 'UpdateAlbumDto' });
 
@@ -105,6 +107,8 @@ const GetAlbumsSchema = z
       .optional()
       .describe('Filter by shared status: true = only shared, false = not shared, undefined = no filter'),
     assetId: z.uuidv4().optional().describe('Filter albums containing this asset ID (ignores other parameters)'),
+    parentId: z.uuidv4().optional().describe('Only return direct children of this folder'),
+    root: stringToBool.optional().describe('true = only top-level folders'),
   })
   .meta({ id: 'GetAlbumsDto' });
 
@@ -186,6 +190,7 @@ export const AlbumResponseSchema = z
       .describe('UTC representation of (local) end date (latest asset)'),
     isActivityEnabled: z.boolean().describe('Activity feed enabled'),
     order: AssetOrderSchema.optional(),
+    parentId: z.uuidv4().nullable().describe('Parent folder ID, null for top-level folders'),
     contributorCounts: z.array(ContributorCountResponseSchema).optional(),
   })
   .meta({ id: 'AlbumResponseDto' });
@@ -227,6 +232,7 @@ export type MapAlbumDto = {
   id: string;
   isActivityEnabled: boolean;
   order: AssetOrder;
+  parentId: string | null;
 };
 
 export const mapAlbum = (entity: MaybeDehydrated<MapAlbumDto>): AlbumResponseDto => {
@@ -270,5 +276,6 @@ export const mapAlbum = (entity: MaybeDehydrated<MapAlbumDto>): AlbumResponseDto
     assetCount: entity.assets?.length || 0,
     isActivityEnabled: entity.isActivityEnabled,
     order: entity.order,
+    parentId: entity.parentId ?? null,
   };
 };

@@ -98,7 +98,24 @@ export class AlbumService extends BaseService {
     return this.mapRepository.getAlbumMapMarkers(id);
   }
 
+  private async validateParent(auth: AuthDto, parentId: string, selfId?: string): Promise<void> {
+    await this.requireAccess({ auth, permission: Permission.AlbumUpdate, ids: [parentId] });
+    if (selfId) {
+      if (parentId === selfId) {
+        throw new BadRequestException('A folder cannot contain itself');
+      }
+      const ancestors = await this.albumRepository.getAncestorIds(parentId);
+      if (ancestors.includes(selfId)) {
+        throw new BadRequestException('A folder cannot be moved into one of its own subfolders');
+      }
+    }
+  }
+
   async create(auth: AuthDto, dto: CreateAlbumDto): Promise<AlbumResponseDto> {
+    if (dto.parentId) {
+      await this.validateParent(auth, dto.parentId);
+    }
+
     const albumUsers = (dto.albumUsers || []).filter(({ userId }) => userId !== auth.user.id);
 
     for (const { userId } of albumUsers) {
@@ -124,6 +141,7 @@ export class AlbumService extends BaseService {
         description: dto.description,
         albumThumbnailAssetId: assetIds[0] || null,
         order: getPreferences(userMetadata).albums.defaultAssetOrder,
+        parentId: dto.parentId ?? null,
       },
       assetIds,
       [{ userId: auth.user.id, role: AlbumUserRole.Owner }, ...albumUsers],
@@ -148,10 +166,15 @@ export class AlbumService extends BaseService {
         throw new BadRequestException('Invalid album thumbnail');
       }
     }
+    if (dto.parentId) {
+      await this.validateParent(auth, dto.parentId, id);
+    }
+
     const updatedAlbum = await this.albumRepository.update(
       album.id,
       {
         id: album.id,
+        parentId: dto.parentId,
         albumName: dto.albumName,
         description: dto.description,
         albumThumbnailAssetId: dto.albumThumbnailAssetId,
@@ -166,6 +189,9 @@ export class AlbumService extends BaseService {
 
   async delete(auth: AuthDto, id: string): Promise<void> {
     await this.requireAccess({ auth, permission: Permission.AlbumDelete, ids: [id] });
+    const album = await this.findOrFail(id, auth.user.id, { withAssets: false });
+    // deleting a folder never deletes its subfolders: they move up one level
+    await this.albumRepository.reparentChildren(id, album.parentId ?? null);
     await this.albumRepository.delete(id);
   }
 

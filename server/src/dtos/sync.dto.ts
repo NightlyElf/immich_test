@@ -234,6 +234,7 @@ const SyncAlbumV1Schema = z
     thumbnailAssetId: z.string().nullable().describe('Thumbnail asset ID'),
     isActivityEnabled: z.boolean().describe('Is activity enabled'),
     order: AssetOrderSchema,
+    parentId: z.uuidv4().nullable().optional().describe('Parent folder ID'),
   })
   .meta({ id: 'SyncAlbumV1' });
 
@@ -247,6 +248,7 @@ const SyncAlbumV2Schema = z
     thumbnailAssetId: z.string().nullable().describe('Thumbnail asset ID'),
     isActivityEnabled: z.boolean().describe('Is activity enabled'),
     order: AssetOrderSchema,
+    parentId: z.uuidv4().nullable().optional().describe('Parent folder ID'),
   })
   .meta({ id: 'SyncAlbumV2' });
 
