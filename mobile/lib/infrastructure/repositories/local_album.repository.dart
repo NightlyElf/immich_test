@@ -59,7 +59,12 @@ class LocalAlbumRepository extends DatabaseAccessor<Drift> with $LocalAlbumRepos
 
   Future<List<LocalAlbum>> getBackupAlbums() async {
     final query = _db.localAlbumEntity.select()
-      ..where((row) => row.backupSelection.equalsValue(BackupSelection.selected));
+      ..where(
+        (row) =>
+            row.backupSelection.equalsValue(BackupSelection.selected) &
+            row.id.equals(kAllPhotosAlbumId).not() &
+            row.name.isIn(kAllPhotosAlbumNames).not(),
+      );
 
     return query.map((row) => row.toDto()).get();
   }

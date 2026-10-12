@@ -11,6 +11,6 @@ abstract class BackupConfig with _$BackupConfig {
     @Default(false) bool useCellularForPhotos,
     @Default(false) bool requireCharging,
     @Default(30) int triggerDelay,
-    @Default(false) bool syncAlbums,
+    @Default(true) bool syncAlbums,
   }) = _BackupConfig;
 }

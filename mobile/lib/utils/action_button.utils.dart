@@ -1,4 +1,3 @@
-import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:immich_mobile/constants/enums.dart';
 import 'package:immich_mobile/domain/models/album/album.model.dart';
@@ -27,7 +26,6 @@ import 'package:immich_mobile/presentation/actions/stack.action.dart';
 import 'package:immich_mobile/presentation/actions/upload.action.dart';
 import 'package:immich_mobile/presentation/widgets/action_buttons/base_action_button.widget.dart';
 import 'package:immich_mobile/presentation/widgets/action_buttons/like_activity_action_button.widget.dart';
-import 'package:immich_mobile/routing/router.dart';
 
 class ActionButtonContext {
   final BaseAsset asset;
@@ -66,7 +64,6 @@ enum ActionButtonType {
   setAlbumCover,
   similarPhotos,
   setProfilePicture,
-  viewInTimeline,
   slideshow,
   download,
   upload,
@@ -150,14 +147,6 @@ enum ActionButtonType {
             context.asset is RemoteAsset && //
             context.isOwner,
       ActionButtonType.openInfo => true,
-      ActionButtonType.viewInTimeline =>
-        context.timelineOrigin != TimelineOrigin.main &&
-            context.timelineOrigin != TimelineOrigin.deepLink &&
-            context.timelineOrigin != TimelineOrigin.trash &&
-            context.timelineOrigin != TimelineOrigin.lockedFolder &&
-            context.timelineOrigin != TimelineOrigin.archive &&
-            context.timelineOrigin != TimelineOrigin.localAlbum &&
-            context.isOwner,
       ActionButtonType.cast => context.isCasting || context.asset.hasRemote,
       ActionButtonType.slideshow => true,
     };
@@ -205,18 +194,6 @@ enum ActionButtonType {
         iconData: Icons.info_outline,
         menuItem: true,
         onPressed: () => EventStream.shared.emit(const ViewerShowDetailsEvent()),
-      ),
-      ActionButtonType.viewInTimeline => BaseActionButton(
-        label: StaticTranslations.instance.view_in_timeline,
-        iconData: Icons.image_search,
-        iconOnly: iconOnly,
-        menuItem: menuItem,
-        onPressed: buildContext == null
-            ? null
-            : () async {
-                await buildContext.router.navigate(const TabShellRoute(children: [MainTimelineRoute()]));
-                EventStream.shared.emit(ScrollToDateEvent(context.asset.createdAt));
-              },
       ),
       ActionButtonType.cast => const ActionMenuItem(action: CastAction()),
     };

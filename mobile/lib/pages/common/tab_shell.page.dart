@@ -11,7 +11,6 @@ import 'package:immich_mobile/generated/translations.g.dart';
 import 'package:immich_mobile/presentation/pages/search/paginated_search.provider.dart';
 import 'package:immich_mobile/providers/haptic_feedback.provider.dart';
 import 'package:immich_mobile/providers/infrastructure/album.provider.dart';
-import 'package:immich_mobile/providers/infrastructure/memory.provider.dart';
 import 'package:immich_mobile/providers/infrastructure/readonly_mode.provider.dart';
 import 'package:immich_mobile/providers/search/search_input_focus.provider.dart';
 import 'package:immich_mobile/providers/tab.provider.dart';
@@ -33,20 +32,14 @@ class _TabShellPageState extends ConsumerState<TabShellPage> {
 
     final navigationDestinations = [
       NavigationDestination(
-        label: context.t.photos,
-        icon: const Icon(Icons.photo_library_outlined),
-        selectedIcon: Icon(Icons.photo_library, color: context.primaryColor),
+        label: context.t.albums,
+        icon: const Icon(Icons.folder_outlined),
+        selectedIcon: Icon(Icons.folder_rounded, color: context.primaryColor),
       ),
       NavigationDestination(
         label: context.t.search,
         icon: const Icon(Icons.search_rounded),
         selectedIcon: Icon(Icons.search, color: context.primaryColor),
-        enabled: !isReadonlyModeEnabled,
-      ),
-      NavigationDestination(
-        label: context.t.albums,
-        icon: const Icon(Icons.photo_album_outlined),
-        selectedIcon: Icon(Icons.photo_album_rounded, color: context.primaryColor),
         enabled: !isReadonlyModeEnabled,
       ),
       NavigationDestination(
@@ -77,7 +70,7 @@ class _TabShellPageState extends ConsumerState<TabShellPage> {
     }
 
     return AutoTabsRouter(
-      routes: const [MainTimelineRoute(), SearchRoute(), AlbumsRoute(), LibraryRoute()],
+      routes: const [AlbumsRoute(), SearchRoute(), LibraryRoute()],
       duration: const Duration(milliseconds: 600),
       transitionBuilder: (context, child, animation) => FadeTransition(opacity: animation, child: child),
       builder: (context, child) {
@@ -105,15 +98,6 @@ class _TabShellPageState extends ConsumerState<TabShellPage> {
 }
 
 void _onNavigationSelected(TabsRouter router, int index, WidgetRef ref) {
-  // On Photos page menu tapped
-  if (router.activeIndex == kPhotoTabIndex && index == kPhotoTabIndex) {
-    EventStream.shared.emit(const ScrollToTopEvent());
-  }
-
-  if (index == kPhotoTabIndex) {
-    ref.invalidate(memoryLaneProvider);
-  }
-
   if (router.activeIndex != kSearchTabIndex && index == kSearchTabIndex) {
     ref.read(searchPreFilterProvider.notifier).clear();
   }

@@ -2,8 +2,6 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:immich_mobile/domain/models/asset/base_asset.model.dart';
-import 'package:immich_mobile/domain/models/events.model.dart';
-import 'package:immich_mobile/domain/utils/event_stream.dart';
 import 'package:immich_mobile/extensions/build_context_extensions.dart';
 import 'package:immich_mobile/extensions/theme_extensions.dart';
 import 'package:immich_mobile/generated/translations.g.dart';
@@ -11,7 +9,6 @@ import 'package:immich_mobile/pages/common/large_leading_tile.dart';
 import 'package:immich_mobile/presentation/widgets/images/thumbnail.widget.dart';
 import 'package:immich_mobile/providers/backup/backup.provider.dart';
 import 'package:immich_mobile/repositories/asset_media.repository.dart';
-import 'package:immich_mobile/routing/router.dart';
 
 @RoutePage()
 class BackupAssetDetailPage extends ConsumerWidget {
@@ -81,19 +78,6 @@ class BackupAssetDetailPage extends ConsumerWidget {
                         child: Thumbnail.fromAsset(asset: asset, size: const Size(64, 64), fit: BoxFit.cover),
                       ),
                     ),
-                    trailing: const Padding(
-                      padding: EdgeInsets.only(right: 24, left: 8),
-                      child: Icon(Icons.image_search),
-                    ),
-                    onTap: () async {
-                      await context.maybePop();
-                      if (!context.mounted) {
-                        return;
-                      }
-
-                      await context.navigateTo(const TabShellRoute(children: [MainTimelineRoute()]));
-                      EventStream.shared.emit(ScrollToDateEvent(asset.createdAt));
-                    },
                   );
                 },
               );

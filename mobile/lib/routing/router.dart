@@ -43,7 +43,6 @@ import 'package:immich_mobile/presentation/pages/asset_selection_timeline.page.d
 import 'package:immich_mobile/presentation/pages/asset_troubleshoot.page.dart';
 import 'package:immich_mobile/presentation/pages/cleanup_preview.page.dart';
 import 'package:immich_mobile/presentation/pages/create_album.page.dart';
-import 'package:immich_mobile/presentation/pages/dev/main_timeline.page.dart';
 import 'package:immich_mobile/presentation/pages/dev/media_stat.page.dart';
 import 'package:immich_mobile/presentation/pages/download_info.page.dart';
 import 'package:immich_mobile/presentation/pages/edit/edit.page.dart';
@@ -122,10 +121,9 @@ class AppRouter extends RootStackRouter {
       page: TabShellRoute.page,
       guards: [_authGuard, _duplicateGuard],
       children: [
-        AutoRoute(page: MainTimelineRoute.page, guards: [_authGuard, _duplicateGuard]),
+        AutoRoute(page: AlbumsRoute.page, guards: [_authGuard, _duplicateGuard]),
         AutoRoute(page: SearchRoute.page, guards: [_authGuard, _duplicateGuard], maintainState: false),
         AutoRoute(page: LibraryRoute.page, guards: [_authGuard, _duplicateGuard]),
-        AutoRoute(page: AlbumsRoute.page, guards: [_authGuard, _duplicateGuard]),
       ],
     ),
     AutoRoute(page: ProfilePictureCropRoute.page),
@@ -146,7 +144,6 @@ class AppRouter extends RootStackRouter {
     AutoRoute(page: BackupRoute.page, guards: [_authGuard, _duplicateGuard]),
     AutoRoute(page: BackupAlbumSelectionRoute.page, guards: [_authGuard, _duplicateGuard]),
     AutoRoute(page: LocalTimelineRoute.page, guards: [_authGuard, _duplicateGuard]),
-    AutoRoute(page: MainTimelineRoute.page, guards: [_authGuard, _duplicateGuard]),
     AutoRoute(page: RemoteAlbumRoute.page, guards: [_authGuard]),
     AutoRoute(
       page: AssetViewerRoute.page,

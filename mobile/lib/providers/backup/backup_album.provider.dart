@@ -18,7 +18,14 @@ class BackupAlbumNotifier extends StateNotifier<List<LocalAlbum>> {
   final LocalAlbumService _localAlbumService;
 
   Future<void> getAll() async {
-    state = await _localAlbumService.getAll(sortBy: {SortLocalAlbumsBy.assetCount});
+    final albums = await _localAlbumService.getAll(sortBy: {SortLocalAlbumsBy.assetCount});
+
+    // The all-photos album is never offered for backup; clear any earlier selection of it.
+    for (final album in albums.where((a) => a.isAllPhotos && a.backupSelection != BackupSelection.none)) {
+      await _localAlbumService.update(album.copyWith(backupSelection: BackupSelection.none));
+    }
+
+    state = albums.where((album) => !album.isAllPhotos).toList();
   }
 
   Future<void> selectAlbum(LocalAlbum album) async {

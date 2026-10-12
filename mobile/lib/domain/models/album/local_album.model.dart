@@ -24,3 +24,12 @@ abstract class LocalAlbum with _$LocalAlbum {
     String? linkedRemoteAlbumId,
   }) = _LocalAlbum;
 }
+
+/// Ids and names of the device-wide "all photos" album ("Recent"/"Recents"). It contains the whole gallery, so it is
+/// never offered for backup: only real folders chosen by the user are backed up.
+const String kAllPhotosAlbumId = 'isAll';
+const List<String> kAllPhotosAlbumNames = ['Recent', 'Recents'];
+
+extension LocalAlbumAllPhotos on LocalAlbum {
+  bool get isAllPhotos => id == kAllPhotosAlbumId || kAllPhotosAlbumNames.contains(name);
+}

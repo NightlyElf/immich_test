@@ -49,6 +49,8 @@ class BackupRepository extends DatabaseAccessor<Drift> with $BackupRepositoryMix
             INNER JOIN main.local_album_entity la on laa.album_id = la.id
             WHERE laa.asset_id = lae.id
                 AND la.backup_selection = ?2
+                AND la.id != 'isAll'
+                AND la.name NOT IN ('Recent', 'Recents')
         )
         AND NOT EXISTS (
             SELECT 1
@@ -82,7 +84,11 @@ class BackupRepository extends DatabaseAccessor<Drift> with $BackupRepositoryMix
   Future<List<LocalAsset>> getCandidates(String userId, {bool onlyHashed = true}) async {
     final selectedAlbumIds = _db.localAlbumEntity.selectOnly(distinct: true)
       ..addColumns([_db.localAlbumEntity.id])
-      ..where(_db.localAlbumEntity.backupSelection.equalsValue(BackupSelection.selected));
+      ..where(
+        _db.localAlbumEntity.backupSelection.equalsValue(BackupSelection.selected) &
+            _db.localAlbumEntity.id.equals(kAllPhotosAlbumId).not() &
+            _db.localAlbumEntity.name.isIn(kAllPhotosAlbumNames).not(),
+      );
 
     final query = _db.localAssetEntity.select()
       ..where(
