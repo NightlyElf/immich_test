@@ -8,26 +8,16 @@
   import { recentAlbumsDropdown } from '$lib/stores/preferences.store';
   import { NavbarGroup, NavbarItem } from '@immich/ui';
   import {
-    mdiAccount,
     mdiAccountMultiple,
     mdiAccountMultipleOutline,
-    mdiAccountOutline,
     mdiArchiveArrowDown,
     mdiArchiveArrowDownOutline,
-    mdiCards,
-    mdiCardsOutline,
-    mdiFolderOutline,
     mdiHeart,
     mdiHeartOutline,
     mdiImageAlbum,
-    mdiImageMultiple,
-    mdiImageMultipleOutline,
     mdiLink,
     mdiLock,
     mdiLockOutline,
-    mdiMagnify,
-    mdiMap,
-    mdiMapOutline,
     mdiTagMultipleOutline,
     mdiToolbox,
     mdiToolboxOutline,
@@ -40,23 +30,18 @@
 </script>
 
 <Sidebar ariaLabel={$t('primary')}>
-  <NavbarItem title={$t('photos')} href={Route.photos()} icon={mdiImageMultipleOutline} activeIcon={mdiImageMultiple} />
-
-  {#if featureFlagsManager.value.search}
-    <NavbarItem title={$t('explore')} href={Route.explore()} icon={mdiMagnify} />
-  {/if}
-
-  {#if featureFlagsManager.value.map}
-    <NavbarItem title={$t('map')} href={Route.map()} icon={mdiMapOutline} activeIcon={mdiMap} />
-  {/if}
-
-  {#if authManager.preferences.memories.enabled && authManager.preferences.memories.sidebarWeb}
-    <NavbarItem title={$t('memories')} href={Route.memories()} icon={mdiCardsOutline} activeIcon={mdiCards} />
-  {/if}
-
-  {#if authManager.preferences.people.enabled && authManager.preferences.people.sidebarWeb}
-    <NavbarItem title={$t('people')} href={Route.people()} icon={mdiAccountOutline} activeIcon={mdiAccount} />
-  {/if}
+  <NavbarItem
+    title={$t('albums')}
+    href={Route.albums()}
+    icon={{ icon: mdiImageAlbum, flipped: true }}
+    bind:expanded={$recentAlbumsDropdown}
+  >
+    {#snippet items()}
+      <span in:fly={{ y: -20 }} class="hidden md:block">
+        <RecentAlbums />
+      </span>
+    {/snippet}
+  </NavbarItem>
 
   {#if authManager.preferences.sharedLinks.enabled && authManager.preferences.sharedLinks.sidebarWeb}
     <NavbarItem title={$t('shared_links')} href={Route.sharedLinks()} icon={mdiLink} />
@@ -73,22 +58,7 @@
 
   <NavbarItem title={$t('favorites')} href={Route.favorites()} icon={mdiHeartOutline} activeIcon={mdiHeart} />
 
-  <NavbarItem
-    title={$t('albums')}
-    href={Route.albums()}
-    icon={{ icon: mdiImageAlbum, flipped: true }}
-    bind:expanded={$recentAlbumsDropdown}
-  >
-    {#snippet items()}
-      <span in:fly={{ y: -20 }} class="hidden md:block">
-        <RecentAlbums />
-      </span>
-    {/snippet}
-  </NavbarItem>
-
-  {#if authManager.preferences.tags.enabled && authManager.preferences.tags.sidebarWeb}
-    <NavbarItem title={$t('tags')} href={Route.tags()} icon={{ icon: mdiTagMultipleOutline, flipped: true }} />
-  {/if}
+  <NavbarItem title={$t('tags')} href={Route.tags()} icon={{ icon: mdiTagMultipleOutline, flipped: true }} />
 
   {#if authManager.preferences.recentlyAdded.sidebarWeb}
     <NavbarItem
@@ -96,10 +66,6 @@
       href={Route.recentlyAdded()}
       icon={{ icon: mdiUploadOutline, flipped: true }}
     />
-  {/if}
-
-  {#if authManager.preferences.folders.enabled && authManager.preferences.folders.sidebarWeb}
-    <NavbarItem title={$t('folders')} href={Route.folders()} icon={{ icon: mdiFolderOutline, flipped: true }} />
   {/if}
 
   <NavbarItem title={$t('utilities')} href={Route.utilities()} icon={mdiToolboxOutline} activeIcon={mdiToolbox} />

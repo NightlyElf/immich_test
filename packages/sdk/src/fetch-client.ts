@@ -881,6 +881,8 @@ export type AlbumResponseDto = {
     /** Last modified asset timestamp */
     lastModifiedAssetTimestamp?: string;
     order?: AssetOrder;
+    /** Parent folder ID, null for top-level folders */
+    parentId: string | null;
     /** Is shared album */
     shared: boolean;
     /** UTC representation of (local) start date (earliest asset) */
@@ -902,6 +904,8 @@ export type CreateAlbumDto = {
     assetIds?: string[];
     /** Album description */
     description?: string | null;
+    /** Parent folder ID (null or omitted for a top-level folder) */
+    parentId?: string | null;
 };
 export type AlbumsAddAssetsDto = {
     /** Album IDs */
@@ -932,6 +936,8 @@ export type UpdateAlbumDto = {
     /** Enable activity feed */
     isActivityEnabled?: boolean;
     order?: AssetOrder;
+    /** Move into this parent folder (null moves to top level) */
+    parentId?: string | null;
 };
 export type BulkIdsDto = {
     /** IDs to process */
@@ -3365,6 +3371,8 @@ export type SyncAlbumV1 = {
     order: AssetOrder;
     /** Owner ID */
     ownerId: string;
+    /** Parent folder ID */
+    parentId?: string | null;
     /** Thumbnail asset ID */
     thumbnailAssetId: string | null;
     /** Updated at */
@@ -3382,6 +3390,8 @@ export type SyncAlbumV2 = {
     /** Album name */
     name: string;
     order: AssetOrder;
+    /** Parent folder ID */
+    parentId?: string | null;
     /** Thumbnail asset ID */
     thumbnailAssetId: string | null;
     /** Updated at */
@@ -4368,12 +4378,14 @@ export function getUserStatisticsAdmin({ id, isFavorite, isTrashed, visibility }
 /**
  * List all albums
  */
-export function getAllAlbums({ assetId, id, isOwned, isShared, name }: {
+export function getAllAlbums({ assetId, id, isOwned, isShared, name, parentId, root }: {
     assetId?: string;
     id?: string;
     isOwned?: boolean;
     isShared?: boolean;
     name?: string;
+    parentId?: string;
+    root?: boolean;
 }, opts?: Oazapfts.RequestOpts) {
     return oazapfts.ok(oazapfts.fetchJson<{
         status: 200;
@@ -4383,7 +4395,9 @@ export function getAllAlbums({ assetId, id, isOwned, isShared, name }: {
         id,
         isOwned,
         isShared,
-        name
+        name,
+        parentId,
+        root
     }))}`, {
         ...opts
     }));

@@ -112,7 +112,7 @@
       title: $t('places'),
       activeTitle: () => placesTitle,
     },
-    ...(authManager.authenticated && authManager.preferences.tags.enabled
+    ...(authManager.authenticated
       ? [
           {
             name: 'tags',

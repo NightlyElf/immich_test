@@ -142,7 +142,7 @@ export const getPagesProvider = ($t: MessageFormatter) => {
       description: $t('tag_feature_description'),
       icon: mdiTagMultipleOutline,
       onAction: () => goto(Route.tags()),
-      $if: () => authManager.authenticated && authManager.preferences.tags.enabled,
+      $if: () => authManager.authenticated,
     },
     {
       title: $t('folders'),

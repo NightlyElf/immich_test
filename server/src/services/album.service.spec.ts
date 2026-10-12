@@ -231,6 +231,7 @@ describe(AlbumService.name, () => {
           albumName: 'test',
           description: 'description',
           order: album.order,
+          parentId: null,
           albumThumbnailAssetId: assetId,
         },
         [assetId],
@@ -250,6 +251,37 @@ describe(AlbumService.name, () => {
         userId: albumUser.userId,
         senderName: owner.name,
       });
+    });
+
+    it('creates a subfolder inside a parent folder', async () => {
+      const parent = AlbumFactory.create();
+      const album = AlbumFactory.create({ parentId: parent.id });
+      const { user: owner } = album.albumUsers.find(({ role }) => role === AlbumUserRole.Owner)!;
+      mocks.access.album.checkOwnerAccess.mockResolvedValue(new Set([parent.id]));
+      mocks.album.create.mockResolvedValue(getForAlbum(album));
+      mocks.user.getMetadata.mockResolvedValue([]);
+
+      const result = await sut.create(AuthFactory.create(owner), { albumName: 'sub', parentId: parent.id });
+
+      expect(result.parentId).toBe(parent.id);
+      expect(mocks.album.create).toHaveBeenCalledWith(
+        expect.objectContaining({ albumName: 'sub', parentId: parent.id }),
+        [],
+        expect.anything(),
+        owner.id,
+      );
+    });
+
+    it('should not create a subfolder inside a folder the user cannot edit', async () => {
+      const parent = AlbumFactory.create();
+      const user = UserFactory.create();
+      mocks.access.album.checkOwnerAccess.mockResolvedValue(new Set());
+
+      await expect(
+        sut.create(AuthFactory.create(user), { albumName: 'sub', parentId: parent.id }),
+      ).rejects.toBeInstanceOf(BadRequestException);
+
+      expect(mocks.album.create).not.toHaveBeenCalled();
     });
 
     it('creates album with assetOrder from user preferences', async () => {
@@ -287,6 +319,7 @@ describe(AlbumService.name, () => {
           albumName: album.albumName,
           description: album.description,
           order: 'asc',
+          parentId: null,
           albumThumbnailAssetId: assetId,
         },
         [assetId],
@@ -339,6 +372,7 @@ describe(AlbumService.name, () => {
           albumName: album.albumName,
           description: album.description,
           order: 'desc',
+          parentId: null,
           albumThumbnailAssetId: assetId,
         },
         [assetId],
@@ -391,6 +425,34 @@ describe(AlbumService.name, () => {
       await expect(
         sut.update(AuthFactory.create(owner), album.id, { albumName: 'new album name' }),
       ).rejects.toBeInstanceOf(BadRequestException);
+    });
+
+    it('should not allow a folder to be moved into itself', async () => {
+      const album = AlbumFactory.create();
+      const { user: owner } = album.albumUsers.find(({ role }) => role === AlbumUserRole.Owner)!;
+      mocks.access.album.checkOwnerAccess.mockResolvedValue(new Set([album.id]));
+      mocks.album.getById.mockResolvedValue(getForAlbum(album));
+
+      await expect(sut.update(AuthFactory.create(owner), album.id, { parentId: album.id })).rejects.toBeInstanceOf(
+        BadRequestException,
+      );
+
+      expect(mocks.album.update).not.toHaveBeenCalled();
+    });
+
+    it('should not allow a folder to be moved into one of its own subfolders', async () => {
+      const album = AlbumFactory.create();
+      const child = AlbumFactory.create();
+      const { user: owner } = album.albumUsers.find(({ role }) => role === AlbumUserRole.Owner)!;
+      mocks.access.album.checkOwnerAccess.mockResolvedValue(new Set([album.id, child.id]));
+      mocks.album.getById.mockResolvedValue(getForAlbum(album));
+      mocks.album.getAncestorIds.mockResolvedValue([child.id, album.id]);
+
+      await expect(sut.update(AuthFactory.create(owner), album.id, { parentId: child.id })).rejects.toBeInstanceOf(
+        BadRequestException,
+      );
+
+      expect(mocks.album.update).not.toHaveBeenCalled();
     });
 
     it('should require a valid thumbnail asset id', async () => {
@@ -446,6 +508,19 @@ describe(AlbumService.name, () => {
       await expect(sut.delete(AuthFactory.create(owner), album.id)).rejects.toBeInstanceOf(BadRequestException);
 
       expect(mocks.album.delete).not.toHaveBeenCalled();
+    });
+
+    it('should move subfolders up to the parent when a folder is deleted', async () => {
+      const parent = AlbumFactory.create();
+      const album = AlbumFactory.create({ parentId: parent.id });
+      const { user: owner } = album.albumUsers.find(({ role }) => role === AlbumUserRole.Owner)!;
+      mocks.access.album.checkOwnerAccess.mockResolvedValue(new Set([album.id]));
+      mocks.album.getById.mockResolvedValue(getForAlbum(album));
+
+      await sut.delete(AuthFactory.create(owner), album.id);
+
+      expect(mocks.album.reparentChildren).toHaveBeenCalledWith(album.id, parent.id);
+      expect(mocks.album.delete).toHaveBeenCalledWith(album.id);
     });
 
     it('should let the owner delete an album', async () => {

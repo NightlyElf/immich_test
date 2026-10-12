@@ -375,7 +375,7 @@
     {/if}
   {/await}
 
-  {#if authManager.authenticated && authManager.preferences.tags.enabled}
+  {#if authManager.authenticated}
     <section class="relative px-2 pb-12 dark:bg-immich-dark-bg dark:text-immich-dark-fg">
       <DetailPanelTags {asset} {isOwner} />
     </section>

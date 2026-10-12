@@ -211,7 +211,14 @@ export class AlbumRepository {
   @GenerateSql({ params: [DummyValue.UUID, { isOwned: true, isShared: true }] })
   getAll(
     ownerId: string,
-    options: { id?: string; isOwned?: boolean; isShared?: boolean; name?: string; parentId?: string; root?: boolean } = {},
+    options: {
+      id?: string;
+      isOwned?: boolean;
+      isShared?: boolean;
+      name?: string;
+      parentId?: string;
+      root?: boolean;
+    } = {},
   ): Promise<MapAlbumDto[]> {
     return this.buildAlbumBaseQuery(ownerId, options)
       .selectAll('album')

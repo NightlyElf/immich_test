@@ -2206,6 +2206,26 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "parentId",
+            "required": false,
+            "in": "query",
+            "description": "Only return direct children of this folder",
+            "schema": {
+              "format": "uuid",
+              "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$",
+              "type": "string"
+            }
+          },
+          {
+            "name": "root",
+            "required": false,
+            "in": "query",
+            "description": "true = only top-level folders",
+            "schema": {
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
@@ -19795,6 +19815,13 @@
           "order": {
             "$ref": "#/components/schemas/AssetOrder"
           },
+          "parentId": {
+            "description": "Parent folder ID, null for top-level folders",
+            "format": "uuid",
+            "nullable": true,
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$",
+            "type": "string"
+          },
           "shared": {
             "description": "Is shared album",
             "type": "boolean"
@@ -19820,6 +19847,7 @@
           "hasSharedLink",
           "id",
           "isActivityEnabled",
+          "parentId",
           "shared",
           "updatedAt"
         ],
@@ -21807,6 +21835,13 @@
                 "description": "Sending an empty string is deprecated; send null instead. Empty strings will no longer be coerced to null in v4."
               }
             ]
+          },
+          "parentId": {
+            "description": "Parent folder ID (null or omitted for a top-level folder)",
+            "format": "uuid",
+            "nullable": true,
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$",
+            "type": "string"
           }
         },
         "required": [
@@ -30227,6 +30262,13 @@
             "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$",
             "type": "string"
           },
+          "parentId": {
+            "description": "Parent folder ID",
+            "format": "uuid",
+            "nullable": true,
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$",
+            "type": "string"
+          },
           "thumbnailAssetId": {
             "description": "Thumbnail asset ID",
             "nullable": true,
@@ -30282,6 +30324,13 @@
           },
           "order": {
             "$ref": "#/components/schemas/AssetOrder"
+          },
+          "parentId": {
+            "description": "Parent folder ID",
+            "format": "uuid",
+            "nullable": true,
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$",
+            "type": "string"
           },
           "thumbnailAssetId": {
             "description": "Thumbnail asset ID",
@@ -32596,6 +32645,13 @@
           },
           "order": {
             "$ref": "#/components/schemas/AssetOrder"
+          },
+          "parentId": {
+            "description": "Move into this parent folder (null moves to top level)",
+            "format": "uuid",
+            "nullable": true,
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$",
+            "type": "string"
           }
         },
         "type": "object"

@@ -94,7 +94,7 @@ export const getAssetBulkActions = ($t: MessageFormatter, album?: AlbumResponseD
   const Tag: ActionItem = {
     title: $t('tag'),
     icon: mdiTagMultipleOutline,
-    $if: () => authManager.preferences.tags.enabled && assetMultiSelectManager.isAllUserOwned,
+    $if: () => assetMultiSelectManager.isAllUserOwned,
     onAction: async () => {
       if (await modalManager.show(AssetTagModal, { assetIds })) {
         assetMultiSelectManager.clear();
@@ -283,7 +283,7 @@ export const getAssetActions = (
   const Tag: ActionItem = {
     title: $t('add_tag'),
     icon: mdiTagPlusOutline,
-    $if: () => authManager.authenticated && authManager.preferences.tags.enabled,
+    $if: () => authManager.authenticated,
     onAction: () => modalManager.show(AssetTagModal, { assetIds: [asset.id] }),
     shortcuts: { key: 't' },
   };

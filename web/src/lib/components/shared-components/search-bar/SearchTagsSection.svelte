@@ -62,7 +62,7 @@
   };
 </script>
 
-{#if authManager.authenticated && authManager.preferences.tags.enabled}
+{#if authManager.authenticated}
   <div id="location-selection" bind:this={container} tabindex="-1">
     <form autocomplete="off" id="create-tag-form">
       <Text class="pb-5">{$t('search_filter_tags_description')}</Text>

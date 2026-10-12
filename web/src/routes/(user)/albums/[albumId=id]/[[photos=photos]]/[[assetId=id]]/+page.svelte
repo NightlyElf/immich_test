@@ -4,6 +4,7 @@
   import { scrollMemoryClearer } from '$lib/actions/scroll-memory';
   import AlbumMap from '$lib/components/album-page/AlbumMap.svelte';
   import AlbumSummary from '$lib/components/album-page/AlbumSummary.svelte';
+  import FolderBrowser from '$lib/components/album-page/FolderBrowser.svelte';
   import ActivityStatus from '$lib/components/asset-viewer/ActivityStatus.svelte';
   import ActivityViewer from '$lib/components/asset-viewer/ActivityViewer.svelte';
   import HeaderActionButton from '$lib/components/HeaderActionButton.svelte';
@@ -413,6 +414,11 @@
                 id={album.id}
                 {isEditor}
                 bind:description={() => album.description, (description) => (album = { ...album, description })}
+              />
+              <FolderBrowser
+                {album}
+                isOwner={isOwned}
+                onMoved={(updated) => (album = { ...album, parentId: updated.parentId })}
               />
             </section>
           {/if}

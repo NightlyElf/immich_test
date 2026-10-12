@@ -100,14 +100,17 @@ export class AlbumService extends BaseService {
 
   private async validateParent(auth: AuthDto, parentId: string, selfId?: string): Promise<void> {
     await this.requireAccess({ auth, permission: Permission.AlbumUpdate, ids: [parentId] });
-    if (selfId) {
-      if (parentId === selfId) {
-        throw new BadRequestException('A folder cannot contain itself');
-      }
-      const ancestors = await this.albumRepository.getAncestorIds(parentId);
-      if (ancestors.includes(selfId)) {
-        throw new BadRequestException('A folder cannot be moved into one of its own subfolders');
-      }
+    if (!selfId) {
+      return;
+    }
+
+    if (parentId === selfId) {
+      throw new BadRequestException('A folder cannot contain itself');
+    }
+
+    const ancestors = await this.albumRepository.getAncestorIds(parentId);
+    if (ancestors.includes(selfId)) {
+      throw new BadRequestException('A folder cannot be moved into one of its own subfolders');
     }
   }
 
