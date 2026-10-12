@@ -24,6 +24,9 @@ class RemoteAlbumEntity extends Table with DriftDefaultsMixin {
 
   IntColumn get order => intEnum<AlbumAssetOrder>()();
 
+  // Parent folder (album) id; null for top-level folders. Intentionally not a foreign key: parents may sync later.
+  TextColumn get parentId => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }

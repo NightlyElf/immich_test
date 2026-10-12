@@ -516,6 +516,7 @@ class SyncStreamRepository extends DatabaseAccessor<Drift> with $SyncStreamRepos
               thumbnailAssetId: Value(album.thumbnailAssetId),
               createdAt: Value(album.createdAt),
               updatedAt: Value(album.updatedAt),
+              parentId: Value(album.parentId),
             );
 
             batch.insert(
@@ -556,6 +557,7 @@ class SyncStreamRepository extends DatabaseAccessor<Drift> with $SyncStreamRepos
             thumbnailAssetId: Value(album.thumbnailAssetId),
             createdAt: Value(album.createdAt),
             updatedAt: Value(album.updatedAt),
+            parentId: Value(album.parentId),
           );
 
           batch.insert(
