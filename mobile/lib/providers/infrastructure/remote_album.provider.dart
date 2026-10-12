@@ -75,6 +75,7 @@ class RemoteAlbumNotifier extends Notifier<RemoteAlbumState> {
   Future<RemoteAlbum?> createAlbum({
     required String title,
     String? description,
+    String? parentId,
     List<String> assetIds = const [],
   }) async {
     try {
@@ -87,6 +88,7 @@ class RemoteAlbumNotifier extends Notifier<RemoteAlbumState> {
         title: title,
         owner: currentUser,
         description: description,
+        parentId: parentId,
         assetIds: assetIds,
       );
 
@@ -105,6 +107,7 @@ class RemoteAlbumNotifier extends Notifier<RemoteAlbumState> {
   Future<RemoteAlbum?> createAlbumWithAssets({
     required String title,
     String? description,
+    String? parentId,
     Iterable<BaseAsset> assets = const [],
   }) async {
     try {
@@ -118,6 +121,7 @@ class RemoteAlbumNotifier extends Notifier<RemoteAlbumState> {
         title: title,
         owner: currentUser,
         description: description,
+        parentId: parentId,
         assetIds: candidates.remoteAssetIds,
       );
 
@@ -146,6 +150,8 @@ class RemoteAlbumNotifier extends Notifier<RemoteAlbumState> {
     String? thumbnailAssetId,
     bool? isActivityEnabled,
     AlbumAssetOrder? order,
+    String? parentId,
+    bool moveToTopLevel = false,
   }) async {
     try {
       final updatedAlbum = await _remoteAlbumService.updateAlbum(
@@ -155,6 +161,8 @@ class RemoteAlbumNotifier extends Notifier<RemoteAlbumState> {
         thumbnailAssetId: thumbnailAssetId,
         isActivityEnabled: isActivityEnabled,
         order: order,
+        parentId: parentId,
+        moveToTopLevel: moveToTopLevel,
       );
 
       final updatedAlbums = state.albums.map((album) {

@@ -33,7 +33,15 @@ class AlbumSelector extends ConsumerStatefulWidget {
   final AlbumSelectorCallback onAlbumSelected;
   final Function? onKeyboardExpanded;
 
-  const AlbumSelector({super.key, required this.onAlbumSelected, this.onKeyboardExpanded});
+  /// When true, only top-level folders are listed (unless the user is searching).
+  final bool topLevelOnly;
+
+  const AlbumSelector({
+    super.key,
+    required this.onAlbumSelected,
+    this.onKeyboardExpanded,
+    this.topLevelOnly = false,
+  });
 
   @override
   ConsumerState<AlbumSelector> createState() => _AlbumSelectorState();
@@ -137,6 +145,12 @@ class _AlbumSelectorState extends ConsumerState<AlbumSelector> {
     unawaited(filterAlbums());
   }
 
+  /// A folder counts as top-level when it has no parent or its parent isn't known locally.
+  List<RemoteAlbum> _topLevelOnly(List<RemoteAlbum> albums) {
+    final ids = albums.map((album) => album.id).toSet();
+    return albums.where((album) => album.parentId == null || !ids.contains(album.parentId)).toList();
+  }
+
   Future<void> filterAlbums() async {
     if (filter.query == null) {
       if (!mounted) {
@@ -144,7 +158,7 @@ class _AlbumSelectorState extends ConsumerState<AlbumSelector> {
       }
 
       setState(() {
-        shownAlbums = sortedAlbums;
+        shownAlbums = widget.topLevelOnly ? _topLevelOnly(sortedAlbums) : sortedAlbums;
       });
 
       return;

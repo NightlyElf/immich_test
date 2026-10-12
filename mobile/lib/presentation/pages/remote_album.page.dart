@@ -9,6 +9,7 @@ import 'package:immich_mobile/domain/models/asset/base_asset.model.dart';
 import 'package:immich_mobile/domain/models/server_capability.model.dart';
 import 'package:immich_mobile/extensions/build_context_extensions.dart';
 import 'package:immich_mobile/generated/translations.g.dart';
+import 'package:immich_mobile/presentation/widgets/album/album_folders.widget.dart';
 import 'package:immich_mobile/presentation/widgets/album/pending_uploads_banner.widget.dart';
 import 'package:immich_mobile/presentation/widgets/bottom_sheet/remote_album_bottom_sheet.widget.dart';
 import 'package:immich_mobile/presentation/widgets/remote_album/album_option.widget.dart';
@@ -192,6 +193,9 @@ class _RemoteAlbumPageState extends ConsumerState<RemoteAlbumPage> {
     final editorCanUpdate = ref.watch(
       serverInfoProvider.select((state) => state.serverVersion.supports(.albumEditorUpdate)),
     );
+    final folderStripHeight = ref.watch(
+      remoteAlbumProvider.select((state) => AlbumFolders.heightFor(state.albums, _album)),
+    );
 
     return ProviderScope(
       overrides: [
@@ -203,7 +207,13 @@ class _RemoteAlbumPageState extends ConsumerState<RemoteAlbumPage> {
         currentRemoteAlbumScopedProvider.overrideWithValue(_album),
       ],
       child: Timeline(
-        topSliverWidget: PendingUploadsBanner(albumId: _album.id),
+        topSliverWidget: SliverMainAxisGroup(
+          slivers: [
+            AlbumFoldersSliver(album: _album, canCreate: isOwner),
+            PendingUploadsBanner(albumId: _album.id),
+          ],
+        ),
+        topSliverWidgetHeight: folderStripHeight,
         appBar: FutureBuilder<bool>(
           future: ref
               .watch(remoteAlbumServiceProvider)

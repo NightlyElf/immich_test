@@ -18,6 +18,7 @@ class AlbumApiRepository extends ApiRepository {
     UserDto owner, {
     required Iterable<String> assetIds,
     String? description,
+    String? parentId,
   }) async {
     final responseDto = await checkNull(
       _api.createAlbum(
@@ -27,6 +28,7 @@ class AlbumApiRepository extends ApiRepository {
               ? const Optional.absent()
               : Optional.present(description.isEmpty ? null : description),
           assetIds: Optional.present(assetIds.toList()),
+          parentId: parentId == null ? const Optional.absent() : Optional.present(parentId),
         ),
       ),
     );
@@ -77,6 +79,9 @@ class AlbumApiRepository extends ApiRepository {
     String? thumbnailAssetId,
     bool? isActivityEnabled,
     AlbumAssetOrder? order,
+    // null = keep as is; moveToTopLevel takes the album out of its parent folder; otherwise move into [parentId]
+    String? parentId,
+    bool moveToTopLevel = false,
   }) async {
     AssetOrder? apiOrder;
     if (order != null) {
@@ -96,6 +101,9 @@ class AlbumApiRepository extends ApiRepository {
               : Optional.present(thumbnailAssetId),
           isActivityEnabled: isActivityEnabled == null ? const Optional.absent() : Optional.present(isActivityEnabled),
           order: apiOrder == null ? const Optional.absent() : Optional.present(apiOrder),
+          parentId: moveToTopLevel
+              ? const Optional.present(null)
+              : (parentId == null ? const Optional.absent() : Optional.present(parentId)),
         ),
       ),
     );
@@ -139,6 +147,7 @@ extension on AlbumResponseDto {
       order: order.orElse(null) == AssetOrder.asc ? AlbumAssetOrder.asc : AlbumAssetOrder.desc,
       assetCount: assetCount,
       isShared: albumUsers.length > 2,
+      parentId: parentId,
     );
   }
 }

@@ -120,12 +120,14 @@ class RemoteAlbumService {
     required UserDto owner,
     required List<String> assetIds,
     String? description,
+    String? parentId,
   }) async {
     final album = await _albumApiRepository.createDriftAlbum(
       title,
       owner,
       description: description,
       assetIds: assetIds,
+      parentId: parentId,
     );
     await _repository.create(album, assetIds);
 
@@ -139,6 +141,8 @@ class RemoteAlbumService {
     String? thumbnailAssetId,
     bool? isActivityEnabled,
     AlbumAssetOrder? order,
+    String? parentId,
+    bool moveToTopLevel = false,
   }) async {
     final owner = await _repository.getOwner(albumId);
     final updatedAlbum = await _albumApiRepository.updateAlbum(
@@ -149,6 +153,8 @@ class RemoteAlbumService {
       thumbnailAssetId: thumbnailAssetId,
       isActivityEnabled: isActivityEnabled,
       order: order,
+      parentId: parentId,
+      moveToTopLevel: moveToTopLevel,
     );
 
     // Update the local database
